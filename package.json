@@ -1,0 +1,19 @@
+{
+  "name": "pre-assignment",
+  "version": "0.1.0",
+  "description": "Reaktor pre-assignment for junior dev position",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "juhani654",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  }
+}
