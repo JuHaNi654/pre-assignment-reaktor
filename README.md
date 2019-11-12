@@ -6,6 +6,7 @@ This is Reaktor pre-assignment for junior developer position
 git clone https://github.com/JuHaNi654/pre-assignment-reaktor.git
 npm install
 npm start
+go to localhost:8080
 ```
 
 # Package reader on a Debian and Ubuntu systems
