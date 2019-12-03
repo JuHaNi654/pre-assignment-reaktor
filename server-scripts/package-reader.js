@@ -20,9 +20,9 @@ const getPackages = () => {
 }
 
 /**
- * @data all the package data from status file
- * @return array with packages as objects
- * 
+ * Function takes status file data and modify to objects
+ * @param {string} data - string of packages from ubuntu status file.
+ * @returns array of package objects
  */
 function parseData(data) {
     let dataArray = splitPackages(data)
@@ -30,14 +30,18 @@ function parseData(data) {
     for (let i = 0; i < dataArray.length; i++) {
         newArray.push(createObj(dataArray[i]))
     }
+    // List new array of packages with new attribute on it
     let updatedArray = filterDepends(newArray)
     return updatedArray
 }
 
 /**
- * @param data takes all the package object array
- * @return return package object array with selected attributes
- * @param packagesDepends attribute values are the package names array wich depends on this package
+ * Function add new attribute to each packages
+ * @param Depends - Updated value wich version numbers are removed
+ * @param packagesDepends - new attribute. 
+ * Includes wich packages depends on current iteration package
+ * @param {Array<objects>} data - takes array of listed pacakges
+ * @returns array of packages with new attribute on it
  */
 function filterDepends(data) {
     return data.map((package) => {
@@ -51,23 +55,23 @@ function filterDepends(data) {
 }
 
 
-// Removes version numbers and then duplicates
 /**
  * 
- * @param {*} text takes Depends with version number and then returns only depend array title
+ * @param {String} depends - given value wich current iteration package depends
+ * @returns package names without version numbers on it  
  */
-function removeExtraChars(text) {
+function removeExtraChars(depends) {
     let regex1 = /\s\((.*?)\)/g
 
-    if (text !== undefined) {
+    if (depends !== undefined) {
         // removes dependency version numbers
-        let x = text.replace(regex1, '')
+        let withoutVersionNumber = depends.replace(regex1, '')
         //split to array if there is , or |
-        x = x.split(/[,|]+/)
+        withoutVersionNumber = withoutVersionNumber.split(/[,|]+/)
         //remove extra space from array items
-        x = x.map(item => item.trim())
-        // return with unqiue item names
-        return [...new Set(x)]
+        withoutVersionNumber = withoutVersionNumber.map(item => item.trim())
+        // return without duplicate names
+        return [...new Set(withoutVersionNumber)]
     }
 
     return null
@@ -75,16 +79,17 @@ function removeExtraChars(text) {
 
 
 /**
- * 
- * @param {*} package given package name
- * @param {*} arr given array list of packages
- * @param dependArr list of package names that depends on given package name
+ * Function filter packages wich depends given package name
+ * @param {string} package - current package name
+ * @param {Array<object>} arr - listed package objects
+ * @returns array of package name wich depends given package name
  */
 function findDepends(package, arr) {
     let dependArr = []
     for (let i = 0; i < arr.length; i++) {
-
+        // if given iteration package doesent have depends then skip
         if (arr[i].Depends === undefined) continue
+        // if iteration package depends given package name then push to array
         if (arr[i].Depends.includes(package)) {
             dependArr.push(arr[i].Package)
         }
@@ -93,45 +98,54 @@ function findDepends(package, arr) {
 }
 
 /**
- * 
- * @param e list of given packages
- * @param x takes list of packages after splitting packages to their own objects
- * @param packageArray takes nested package data arrays and filters empety array off
-
+ * Function split given list of string packages
+ * and removes empty arrays from the splitted arrayPackages
+ * @param {string} list - list of installed packages
+ * @returns Listed array of splited packages to own array
  */
-function splitPackages(e) {
+function splitPackages(list) {
     let packageArray = []
-    let x = e.split(/(\n\n)/)
-    for (let i = 0; i < x.length; i++) {
-        let z = x[i].split(/\n/).filter(Boolean)
-        packageArray.push(z)
+    let arrayOfPackages = list.split(/(\n\n)/)
+    for (let i = 0; i < arrayOfPackages.length; i++) {
+        let filteredArray = arrayOfPackages[i].split(/\n/).filter(Boolean)
+        packageArray.push(filteredArray)
     }
     return packageArray.filter(x => x.length !== 0)
 }
 
 /**
- * 
- * @param {*} e takes single package array data
- * compines rows with text and then returns with @function objectify wich returns as object
+ * Function take array of strings from single package and combines
+ * some of the text if package attribute has multiline text
+ * @param {Array<string>} arr - single given package array data 
+ * @returns @function objectify returns function call of combined text
  */
-function createObj(e) {
-    let obj = e
+function createObj(arr) {
     let regex = /(^\w.+:)/
     let newObj = []
     let text
 
-    for (let i = 0; i < obj.length; i++) {
-        let curVal = obj[i]
-        let nextVal = obj[i + 1]
+    for (let i = 0; i < arr.length; i++) {
+        let curVal = arr[i]
+        let nextVal = arr[i + 1]
+        // If given string is start of package attribute
         if (curVal.match(regex)) {
+            // Checks if there is next string or it is last iteration item
             if (nextVal === undefined) {
                 newObj.push(curVal)
-            } else if (nextVal.match(regex)) {
+
+            }
+            // Checks if next iteration item is new attribute
+            else if (nextVal.match(regex)) {
                 newObj.push(curVal)
-            } else {
+
+            }
+            // Set start of attribute if there is multiline text
+            else {
                 text = curVal
             }
-        } else {
+        }
+        // Combines all of the multiline attribute text
+        else {
             text = text + " " + curVal
             if (nextVal === undefined) {
                 newObj.push(text)
@@ -145,19 +159,26 @@ function createObj(e) {
 
 
 /**
- * 
- * @param {*} data package with array dasta as array
- * @return package as object with key and value attributes
+ * Function modify given array of strings returns as a object attributes
+ * @param {Array<string>} data - array of strings wich are from single package data
+ * @returns package as a object with attributes on it.
  */
 function objectify(data) {
     var obj = {}
     for (let i = 0; i < data.length; i++) {
-        let x = data[i].split(/:(.+)/).filter(Boolean)
-        // If in key has dash then it will remove the dash and compine those words
-        if (x[0].match(/-/)) {
-            x[0] = x[0].replace(/-/, '')
+        // Each iteration items are splitted to attribute name and value
+        let keysAndValues = data[i].split(/:(.+)/).filter(Boolean)
+        /**
+         * If attribute key has multi word with dash on it
+         * then it will combine those words, so it will be easier to access
+         */
+        if (keysAndValues[0].match(/-/)) {
+            keysAndValues[0] = keysAndValues[0].replace(/-/, '')
         }
-        obj[x[0]] = x[1].replace(/\s{2,}/gm, "").trim()
+        // Inserting attribute and the value to the object
+        // In values removed extra spaces
+        obj[keysAndValues[0]] = keysAndValues[1].replace(/\s{2,}/gm, "").trim()
+
     }
     return obj
 }

@@ -8,7 +8,7 @@ $.get("http://localhost:8080/api/packages", function (data) {
 });
 /**
  * 
- * @param {*} index id of package
+ * @param {number} index id of package
  */
 function createTableRow(index) {
     let tableRow = document.createElement("tr")
@@ -21,7 +21,7 @@ function createTableRow(index) {
 
 /**
  * function creates column element with package data
- * @param {*} obj takes package object
+ * @param {object} obj takes package object
  */
 function createTableColumn(obj) {
     let tableColumn = document.createElement("td")
@@ -34,9 +34,9 @@ function createTableColumn(obj) {
 }
 /**
  * 
- * @param {*} description Package description
- * @param {*} depends Package that depends other packages
- * @param {*} otherDepends Other packages that depends on this package
+ * @param {string} description Package description
+ * @param {Array<string>} depends Package that depends other packages
+ * @param {Array<string>} otherDepends Other packages that depends on this package
  */
 function createPackageInfo(description = null, depends = null, otherDepends = null) {
     let desc = createNode(description)
@@ -61,7 +61,7 @@ function createPackageInfo(description = null, depends = null, otherDepends = nu
 }
 /**
  * 
- * @param {*} data array of depends and return clickable version of it
+ * @param {Array<string>} data array of depends and return clickable version of it
  */
 function createButton(data) {
     if (data !== null && data.length > 0) {
@@ -74,7 +74,7 @@ function createButton(data) {
 }
 /**
  * 
- * @param {*} text passed desciption paragraph
+ * @param {string} text passed desciption paragraph
  * Create p html element and inject passed text value 
  */
 function createNode(text) {
@@ -102,7 +102,7 @@ function navFunction(val) {
 }
 /**
  * 
- * @param {*} data expand selected row
+ * @param {*} data - clicked row element
  */
 function openRow(data) {
     $(data).find("#cont").slideToggle("slow")
